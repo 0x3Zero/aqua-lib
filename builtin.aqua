@@ -1,0 +1,59 @@
+-- DHT Service
+
+data FdbDht:
+  public_key: string
+  alias: string
+  cid: string
+  data_key: string
+
+data FdbResult:
+  success: bool
+  err_msg: string
+
+service Dht("dht"):
+  get_latest_record_by_pk_and_key(key: string, public_key: string) -> FdbDht
+  get_records_by_key(key: string) -> []FdbDht
+  initialize() -> FdbResult
+  insert(data_key: string, alias: string, cid: string, public_key: string, signature: string, message: string, enc: string) -> FdbResult
+  shutdown() -> FdbResult
+  verify_signature(public_key: string, signature: string, message: string, enc: string) -> bool
+
+-- Ed25519 Service
+
+data Ed25519KeyPair:
+  pk: string
+  sk: string
+
+service Ed25519("ed25519"):
+  generate_keypair() -> Ed25519KeyPair
+  sign(message: string, private_key: string) -> string
+  verify(public_key: string, signature: string, message: string) -> bool
+
+-- Block Formatter Service
+
+data Block:
+  timestamp: u64
+  name: string
+  content: string
+  previous: string
+
+service BlockFormatter("block_formatter"):
+  deserialize(json: string) -> Block
+  format(format_type: string, blocks: []Block) -> string
+  serialize(name: string, content: string, previous_cid: string) -> string
+
+-- IPFS Dag Service
+
+data IpfsDagGetResult:
+  success: bool
+  error: string
+  content: string
+
+data IpfsDagPutResult:
+  success: bool
+  error: string
+  cid: string
+
+service IpfsDag("ipfs_dag"):
+  get(hash: string, api_multiaddr: string, timeout_sec: u64) -> IpfsDagGetResult
+  put(object: string, api_multiaddr: string, timeout_sec: u64) -> IpfsDagPutResult
